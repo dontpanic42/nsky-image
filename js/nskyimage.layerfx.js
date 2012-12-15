@@ -59,8 +59,8 @@ nsky.FxLayer.HSLModulate.prototype = new nsky.FxLayer();
 nsky.FxLayer.HSLModulate.prototype.doEffect = function(options) {
 
 	options = $.extend({
-		hue : 100,
-		saturation : 0,
+		hue : 180,
+		saturation : 20,
 		luminance : 100
 	}, options);
 
@@ -111,6 +111,10 @@ nsky.FxLayer.HSLModulate.prototype.toHSL = function(color) {
 	g = nsky.Util.Channel('g', color);
 	b = nsky.Util.Channel('b', color);
 	a = nsky.Util.Channel('a', color);
+
+	r = (r==0)? 0 : r/255;
+	g = (g==0)? 0 : g/255;
+	b = (b==0)? 0 : b/255;
 
 	var max, min;
 	max = Math.max(r, g, b);
