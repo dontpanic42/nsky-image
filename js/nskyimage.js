@@ -29,6 +29,25 @@ nsky.Util.RGBAtoString = function(rgba) {
 		( rgba         & 0xFF) + ")";
 }
 
+nsky.Util.Channel = function(name, color) {
+	switch(name) {
+		case 'red':
+		case 'r':
+			return (color >>> 24) & 0xFF;
+		case 'green':
+		case 'g':
+			return (color >>> 16) & 0xFF;
+		case 'blue':
+		case 'b':
+			return (color >>> 8)  & 0xFF;
+		case 'alpha':
+		case 'a':
+			return (color & 0xFF);
+		default:
+			return 0;
+	}
+}
+
 nsky.Canvas.flip = function(options) {
 	var opt = $.extend({
 		data : [],
@@ -54,11 +73,11 @@ nsky.Canvas.flip = function(options) {
 		y : (opt.offset.y + opt.size.height > canvas.height())? canvas.height() : opt.offset.y + opt.size.height
 	};
 
-	console.log("Data length: x(" + opt.data.length + ") y(" + opt.data[0].length + ")");
-	console.log(opt.size);
-	console.log(opt.offset);
-	console.log(bo1);
-	console.log(bo2);
+	// console.log("Data length: x(" + opt.data.length + ") y(" + opt.data[0].length + ")");
+	// console.log(opt.size);
+	// console.log(opt.offset);
+	// console.log(bo1);
+	// console.log(bo2);
 
 	if(bo1.x > canvas.width() || bo1.y > canvas.height()) return;
 	if(bo2.x < 0 || bo2.y < 0) return;

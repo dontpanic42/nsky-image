@@ -144,3 +144,38 @@ nsky.Layer.prototype.blend = function(options) {
 		}
 	};
 }
+
+
+nsky.FxLayer = function() { }
+
+nsky.FxLayer.prototype = new nsky.Layer();
+
+
+/**
+ * To stay consistent with the default, imagebased layer,
+ * this method will be called to invoke the effect. It
+ * simply extends the options object to incorporate defaults
+ * and delegates to the main effect method, doEffect.
+ */
+nsky.FxLayer.prototype.blend = function(options) { 
+		var opt = $.extend({
+		offset : {
+			x : 0, 
+			y : 0
+		},
+		data : [],
+		size : {
+			width : 0,
+			height : 0
+		}
+	}, options);
+
+	return this.doEffect(opt);
+}
+
+/**
+ * This is the main effect method, which the effect implementation
+ * overrides. The returnvalue is an object with the images size, offset
+ * and pixeldata.
+ */
+nsky.FxLayer.prototype.doEffect = function(options) { }

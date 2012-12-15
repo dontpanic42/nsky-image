@@ -5,6 +5,7 @@
 	<script type="application/javascript" src="js/nskyimage.js"></script>
 	<script type="application/javascript" src="js/nskyimage.layer.js"></script>
 	<script type="application/javascript" src="js/nskyimage.blend.js"></script>
+	<script type="application/javascript" src="js/nskyimage.layerfx.js"></script>
 	<script type="application/javascript">
 		$(document).ready(function() {
 
@@ -20,7 +21,6 @@
 				layer.setDataFromImage(img);
 				img2.onload = function() {
 					layer2.setDataFromImage(img2);
-					console.log("two images loaded");
 					layer2.offset.x = 10;
 
 					var result = layer2.blend({
@@ -32,6 +32,16 @@
 						},
 						blend: nsky.Layer.Blend.multiply
 					});
+
+					var gammaFx = new nsky.FxLayer.GammaCorrect();
+					result = gammaFx.blend($.extend({
+						gamma : 0.5
+					}, result));
+
+					var hslFx = new nsky.FxLayer.HSLModulate();
+					result = hslFx.blend(result);
+
+					console.log(result);
 
 					nsky.Canvas.flip(result);
 				}

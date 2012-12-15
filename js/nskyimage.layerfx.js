@@ -58,15 +58,15 @@ nsky.FxLayer.HSLModulate = function() { }
 nsky.FxLayer.HSLModulate.prototype = new nsky.FxLayer();
 nsky.FxLayer.HSLModulate.prototype.doEffect = function(options) {
 
-	$.extend({
+	options = $.extend({
 		hue : 100,
-		saturation : 100,
+		saturation : 0,
 		luminance : 100
 	}, options);
 
 	var hp = (options.hue == 0)? 0 : options.hue / 100;
-	var sp = (options.saturation == 0)? 0 : saturation / 100;
-	var lp = (options.luminance == 0)? 0 : luminance / 100;
+	var sp = (options.saturation == 0)? 0 : options.saturation / 100;
+	var lp = (options.luminance == 0)? 0 : options.luminance / 100;
 
 	var color, tmp, hsl;
 	var out = [];
@@ -123,8 +123,10 @@ nsky.FxLayer.HSLModulate.prototype.toHSL = function(color) {
 		h = s = 0;
 	} else {
 		var delta = max - min;
-		s = (l > 0.5)? delta / (2 - max - min) : delta / (max + min);
-		swtich(max) {
+		
+		s = ((l > 0.5)? delta / (2 - max - min) : delta / (max + min));
+
+		switch(max) {
 			case r : 
 				h = (g - b) / delta + ((g < b)? 6 : 0);
 				break;
@@ -171,7 +173,7 @@ nsky.FxLayer.HSLModulate.prototype.fromHSL = function(hsl) {
         var p = 2 * hsl.l - q;
         r = hueToRGB(p, q, hsl.h + 1/3);
         g = hueToRGB(p, q, hsl.h);
-        b = hueToRgb(p, q, hsl.h - 1/3);
+        b = hueToRGB(p, q, hsl.h - 1/3);
 	}
 
 	var out;
