@@ -22,8 +22,9 @@ nsky.FxLayer.GammaCorrect.prototype.doEffect = function(options) {
 		offset : options.offset
 	};
 
-	var color, tmp;
-	var out = [];
+	var color, tmp, out = [],
+		oWidth = options.size.width,
+		oHeight = options.size.height;
 
 	// Create lookup table for gamma values 0..255
 	// this reduces the time for an 640*480 image from
@@ -32,9 +33,9 @@ nsky.FxLayer.GammaCorrect.prototype.doEffect = function(options) {
 	for(var i = 1; i <= 255; i++)
 		gamma_lookup[i] = 255 * Math.pow((i / 255), gamma);
 
-	for(var x = 0; x < options.size.width; x++) {
+	for(var x = 0; x < oWidth; x++) {
 		out[x] = [];
-		for(var y = 0; y < options.size.height; y++) {
+		for(var y = 0; y < oHeight; y++) {
 			color = options.data[x][y];
 			out[x][y] = Math.floor(
 							(gamma_lookup[(color >>> 24)] << 24) +
