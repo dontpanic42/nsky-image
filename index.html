@@ -22,7 +22,7 @@
 				img2.onload = function() {
 					console.time("All");
 					layer2.setDataFromImage(img2);
-					layer2.offset.x = 10;
+					layer2.offset.x = 0;
 
 					// var result = layer2.blend({
 					// 	data : layer.data,
@@ -42,6 +42,11 @@
 					// }, result));
 					// console.timeEnd("Gamma");
 
+					// console.time("Negate");
+					// var negaFx = new nsky.FxLayer.Negate();
+					// result = negaFx.blend(result);
+					// console.timeEnd("Negate");
+
 					var neg  = new nsky.FxLayer.Colortone();
 					result = neg.blend($.extend({
 						mask_image : result,
@@ -53,10 +58,10 @@
 					result.mask_negate = true;
 					result = neg.blend(result)
 
-					var gammaFx = new nsky.FxLayer.GammaCorrect();
-					result = gammaFx.blend($.extend({
-						gamma : 0.7
-					}, result));
+					// var gammaFx = new nsky.FxLayer.GammaCorrect();
+					// result = gammaFx.blend($.extend({
+					// 	gamma : 0.7
+					// }, result));
 
 					// console.time("HSL");
 					// var hslFx = new nsky.FxLayer.HSLModulate();

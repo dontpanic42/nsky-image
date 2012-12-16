@@ -44,6 +44,7 @@ nsky.FxLayer.GammaCorrect.prototype.doEffect = function(options) {
 		}
 	}
 
+
 	return {
 		size : options.size,
 		offset : options.offset,
@@ -74,23 +75,19 @@ nsky.FxLayer.HSLModulate.prototype.doEffect = function(options) {
 	var sp = (options.saturation == 0)? 0 : options.saturation / 100;
 	var lp = (options.luminance == 0)? 0 : options.luminance / 100;
 
-	var color, tmp, hsl;
+	var hsl;
 	var out = [];
 
 	for(var x = 0; x < options.size.width; x++) {
 		out[x] = [];
 		for(var y = 0; y < options.size.height; y++) {
-
-			color = options.data[x][y];
-
-			hsl = this.toHSL(color);
+			hsl = this.toHSL(options.data[x][y]);
 
 			hsl.h *= hp;
 			hsl.l *= lp;
 			hsl.s *= sp;
 
-			color = this.fromHSL(hsl);
-			out[x][y] = color;
+			out[x][y] = this.fromHSL(hsl);;
 		}
 	}
 
@@ -108,10 +105,10 @@ nsky.FxLayer.HSLModulate.prototype.doEffect = function(options) {
  */
 nsky.FxLayer.HSLModulate.prototype.toHSL = function(color) {
 	var r, g, b, a, h, s, l;
-	r = nsky.Util.Channel('r', color);
-	g = nsky.Util.Channel('g', color);
-	b = nsky.Util.Channel('b', color);
-	a = nsky.Util.Channel('a', color);
+	r = (color >>> 24);
+	g = (color >>> 16) & 0xFF;
+	b = (color >>> 8 ) & 0xFF;
+	a = color & 0xFF;
 
 	r = (r==0)? 0 : r/255;
 	g = (g==0)? 0 : g/255;
@@ -164,46 +161,41 @@ nsky.FxLayer.HSLModulate.prototype.fromHSL = function(hsl) {
 
 	if(hsl.s == 0) {
 		r = g = b = hsl.l;
-	} else {
-		var hueToRGB = function(p, q, t) {
-			if(t < 0) t += 1;
-            if(t > 1) t -= 1;
-            if(t < 1/6) return p + (q - p) * 6 * t;
-            if(t < 1/2) return q;
-            if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-            return p;
-		}
+	} else { 
 
 		var q = hsl.l < 0.5 ? hsl.l * (1 + hsl.s) : hsl.l + hsl.s - hsl.l * hsl.s;
         var p = 2 * hsl.l - q;
-        r = hueToRGB(p, q, hsl.h + 1/3);
-        g = hueToRGB(p, q, hsl.h);
-        b = hueToRGB(p, q, hsl.h - 1/3);
+        r = this.hueToRGB(p, q, hsl.h + 1/3);
+        g = this.hueToRGB(p, q, hsl.h);
+        b = this.hueToRGB(p, q, hsl.h - 1/3);
 	}
 
-	return 	((r * 255) << 24) +
-			((g * 255) << 16) +
-	 		((b * 255) <<  8) +
+	return 	(Math.floor(r * 255) << 24) +
+			(Math.floor(g * 255) << 16) +
+	 		(Math.floor(b * 255) <<  8) +
 	 		(hsl.a);
 }
 
-
+/**
+ * Helper method 
+ */
+nsky.FxLayer.HSLModulate.prototype.hueToRGB = function(p, q, t) {
+	if(t < 0) t += 1;
+    if(t > 1) t -= 1;
+    if(t < 1/6) return p + (q - p) * 6 * t;
+    if(t < 1/2) return q;
+    if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    return p;
+}
 
 /*****************************************************************************************
  * Simply negates the image colors (255 - channel)
  *
- * Parameters: 
- *		'negate_alpha' : false|true (default: false) if true the alpha value will be negated
- 													 too.
  ****************************************************************************************/
 
 nsky.FxLayer.Negate = function() {}
 nsky.FxLayer.Negate.prototype = new nsky.FxLayer();
 nsky.FxLayer.Negate.prototype.doEffect = function(options) {
-
-	options = $.extend({
-		negate_alpha : false
-	}, options);
 
 	var color, tmp;
 	var out = [];
@@ -211,17 +203,38 @@ nsky.FxLayer.Negate.prototype.doEffect = function(options) {
 	for(var x = 0; x < options.size.width; x++) {
 		out[x] = [];
 		for(var y = 0; y < options.size.height; y++) {
-
 			color = options.data[x][y];
+			out[x][y] = (~color & ~0xFF) + (color & 0xFF);
+		}
+	}
 
-			out[x][y] = nsky.Util.RGBAtoColor(
-					(255 - nsky.Util.Channel('r', color)),
-					(255 - nsky.Util.Channel('g', color)),
-					(255 - nsky.Util.Channel('b', color)),
-					(options.negate_alpha)?
-						(255 - nsky.Util.Channel('a', color)) : 
-							   nsky.Util.Channel('a', color)
-				);
+	return {
+		size : options.size,
+		offset : options.offset,
+		data : out
+	};
+}
+
+/*****************************************************************************************
+ * Fast grayscale conversion
+ ****************************************************************************************/
+
+nsky.FxLayer.Grayscale = function() {}
+nsky.FxLayer.Grayscale.prototype = new nsky.FxLayer();
+nsky.FxLayer.Grayscale.prototype.doEffect = function(options) {
+
+
+	var out = [];
+	var color, intensity;
+	for(var x = 0; x < options.size.width; x++) {
+		out[x] = [];
+		for(var y = 0; y < options.size.height; y++) {
+			color = options.data[x][y];
+			intensity =   0.3  * ((color >>> 24))
+						+ 0.59 * ((color >> 16) & 0xFF)
+						+ 0.11 * ((color >> 8) & 0xFF);
+			out[x][y] = 
+				(intensity << 24) + (intensity << 16) + (intensity << 8) + (color & 0xFF);
 
 		}
 	}
@@ -282,47 +295,34 @@ nsky.FxLayer.Colortone.prototype.doEffect = function(options) {
 			fillcolor : nsky.Util.RGBAtoColor(128, 128, 128, 255)
 		}, options));
 	} else {
+		console.time("Grayscale");
 		mask = options.mask_image;
-		//convert to grayscale...
-		var hslFx = new nsky.FxLayer.HSLModulate();
-		mask = hslFx.blend($.extend({
-			saturation : 0
-		}, mask));
+		var grayFx = new nsky.FxLayer.Grayscale();
+		mask = grayFx.blend(mask);
+		console.timeEnd("Grayscale");
 	}
 
+	console.time("Negation");
 	if(options.mask_negate) {
 		var negFx = new nsky.FxLayer.Negate();
 		mask = negFx.blend(mask);
 	}
-
-	//2. create solid color image
-
-	var colFx = new nsky.FxLayer.TmpImage();
-	var color = colFx.blend($.extend({
-		fillcolor : options.color
-	}, options));
+	console.timeEnd("Negation");
 
 	//3. blend solid color and original image using the mask
 
+	console.time("Blending");
 	var mixed = [];
-	var fillweight = 0;
 	var cadd = nsky.Layer.Blend.plus;
 
 	for(var x = 0; x < options.size.width; x++) {
 		mixed[x] = [];
 		for(var y = 0; y < options.size.height; y++) {
-			//original color
-			ocolor = options.data[x][y];
-			//mask color
-			mcolor = nsky.Util.Channel('r', mask.data[x][y]);
-			//fill color
-			fcolor = color.data[x][y];
-
-			fillweight = (mcolor == 0)? 0 : ((mcolor / 255) * 100);
-
-			mixed[x][y] = cadd(ocolor, fcolor, {'blend_weight_p1' : fillweight});
+			mcolor = (mask.data[x][y] >>> 24);
+			mixed[x][y] = cadd(options.data[x][y], options.color, ((mcolor == 0)? 0 : (mcolor / 255)));
 		}
 	}
+	console.timeEnd("Blending");
 
 	return {
 		size : options.size,

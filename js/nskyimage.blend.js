@@ -65,34 +65,46 @@ nsky.Layer.Blend.burn = function(rgba1, rgba2) {
  * is omitted 100 - p1 will be used.
  * If no parameter is given, the values will be added equaly (50% each).
  */
-nsky.Layer.Blend.plus = function(rgba1, rgba2, options) {
-	var opt = $.extend({
-		blend_weight_p1 : 50,
-	}, options);
+nsky.Layer.Blend.plus = function(rgba1, rgba2, p1) {
+	// var opt = $.extend({
+	// 	blend_weight_p1 : 0.5,
+	// 	blend_weight_p2 : 1 - this.blend_weight_p1
+	// }, options);
+	var p2 = 1 - p1;
+	// var p1 = opt.blend_weight_p1;
+	// var p2 = opt.blend_weight_p2;
 
-	var p1 = opt.blend_weight_p1;
-	var p2 = (opt.blend_weight_p2)? opt.blend_weight_p2 : 100 - p1;
-	p1 = (p1 == 0)? 0 : p1/100;
-	p2 = (p2 == 0)? 0 : p2/100;
+	// var out = 0;
 
-	var out = 0;
+	// out += Math.min(
+	// 	(p1*nsky.Util.Channel('r', rgba1)) + 
+	// 	(p2*nsky.Util.Channel('r', rgba2)),
+	// 	255) << 24;
+	// out += Math.min(
+	// 	(p1*nsky.Util.Channel('g', rgba1)) + 
+	// 	(p2*nsky.Util.Channel('g', rgba2)),
+	// 	255) << 16;
+	// out += Math.min(
+	// 	(p1*nsky.Util.Channel('b', rgba1)) + 
+	// 	(p2*nsky.Util.Channel('b', rgba2)),
+	// 	255) << 8;
+	// out += Math.min(
+	// 	(p1 * nsky.Util.Channel('a', rgba1)) + 
+	// 	(p2 * nsky.Util.Channel('a', rgba2)),
+	// 	255);
 
-	out += Math.min(
-		(p1*nsky.Util.Channel('r', rgba1)) + 
-		(p2*nsky.Util.Channel('r', rgba2)),
-		255) << 24;
-	out += Math.min(
-		(p1*nsky.Util.Channel('g', rgba1)) + 
-		(p2*nsky.Util.Channel('g', rgba2)),
-		255) << 16;
-	out += Math.min(
-		(p1*nsky.Util.Channel('b', rgba1)) + 
-		(p2*nsky.Util.Channel('b', rgba2)),
-		255) << 8;
-	out += Math.min(
-		(p1 * nsky.Util.Channel('a', rgba1)) + 
-		(p2 * nsky.Util.Channel('a', rgba2)),
-		255);
+	// return out;
 
-	return out;
+	return (Math.min(
+			(p1 * (rgba1 >>> 24)) + (p2 * (rgba2 >>> 24)),
+			255) << 24) + 
+		(Math.min(
+			(p1 * ((rgba1 >>> 16) & 0xFF)) + (p2 * ((rgba2 >>> 16) & 0xFF)),
+			255) << 16) + 
+		(Math.min(
+			(p1 * ((rgba1 >>>  8) & 0xFF)) + (p2 * ((rgba2 >>>  8) & 0xFF)),
+			255) <<  8) + 
+		(Math.min(
+			(p1 * ((rgba1 & 0xFF))) + (p2 * ((rgba2 & 0xFF))),
+			255));
 }
