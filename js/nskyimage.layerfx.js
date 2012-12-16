@@ -38,9 +38,9 @@ nsky.FxLayer.GammaCorrect.prototype.doEffect = function(options) {
 		for(var y = 0; y < oHeight; y++) {
 			color = options.data[x][y];
 			out[x][y] = Math.floor(
-							(gamma_lookup[(color >>> 24)] << 24) +
-							(gamma_lookup[(color >>> 16) & 0xFF] << 16) + 
-							(gamma_lookup[(color >>> 8)  & 0xFF] << 8) +
+							(gamma_lookup[(color >>> 24)] << 24) |
+							(gamma_lookup[(color >>> 16) & 0xFF] << 16) | 
+							(gamma_lookup[(color >>> 8)  & 0xFF] << 8) |
 							(color & 0xFF));
 		}
 	}
