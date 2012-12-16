@@ -34,10 +34,10 @@
 					// 	blend: nsky.Layer.Blend.plus
 					// });
 					var result = layer2;
-					// var gammaFx = new nsky.FxLayer.GammaCorrect();
-					// result = gammaFx.blend($.extend({
-					// 	gamma : 0.5
-					// }, result));
+					var gammaFx = new nsky.FxLayer.GammaCorrect();
+					result = gammaFx.blend($.extend({
+						gamma : 0.5
+					}, result));
 
 					var neg  = new nsky.FxLayer.Colortone();
 					result = neg.blend($.extend({

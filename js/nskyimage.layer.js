@@ -23,6 +23,8 @@ nsky.Layer.prototype.setDataFromImage = function(image) {
 	var tmpCanvas = $('<canvas></canvas>')
 	.width(this.size.width = image.width)
 	.height(this.size.height = image.height);
+	tmpCanvas.get(0).width = this.size.width;
+	tmpCanvas.get(0).height = this.size.height;
 	var context = tmpCanvas.get(0).getContext("2d");
 
 	context.drawImage(image, 0, 0);
@@ -33,13 +35,15 @@ nsky.Layer.prototype.setDataFromImage = function(image) {
 
 	for(var y = 0; y < this.size.height; y++) {
 		for(var x = 0; x < this.size.width; x++) {
-			this.data[x][y] = 0 + 
+			this.data[x][y] =
 				(imageData.data[index++] << 24) +	
 				(imageData.data[index++] << 16) +
 				(imageData.data[index++] <<  8) +
 				(imageData.data[index++]);
 		}
 	}
+
+	console.log(image.width, image.height, this.size);
 }
 
 nsky.Layer.prototype.blend = function(options) {
