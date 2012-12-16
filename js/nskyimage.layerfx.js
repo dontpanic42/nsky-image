@@ -25,16 +25,22 @@ nsky.FxLayer.GammaCorrect.prototype.doEffect = function(options) {
 	var color, tmp;
 	var out = [];
 
+	// Create lookup table for gamma values 0..255
+	// this reduces the time for an 640*480 image from
+	// 640ms to 30ms (!)
+	var gamma_lookup = [0];
+	for(var i = 1; i <= 255; i++)
+		gamma_lookup[i] = 255 * Math.pow((i / 255), gamma);
+
 	for(var x = 0; x < options.size.width; x++) {
 		out[x] = [];
 		for(var y = 0; y < options.size.height; y++) {
-
 			color = options.data[x][y];
-			tmp  = ( 255 * Math.pow((nsky.Util.Channel('r', color) / 255), gamma) ) << 24;
-			tmp += ( 255 * Math.pow((nsky.Util.Channel('g', color) / 255), gamma) ) << 16;
-			tmp += ( 255 * Math.pow((nsky.Util.Channel('b', color) / 255), gamma) ) <<  8;
-			tmp += nsky.Util.Channel('a', color);
-			out[x][y] = tmp;
+			out[x][y] = Math.floor(
+							(gamma_lookup[(color >>> 24)] << 24) +
+							(gamma_lookup[(color >>> 16) & 0xFF] << 16) + 
+							(gamma_lookup[(color >>> 8)  & 0xFF] << 8) +
+							(color & 0xFF));
 		}
 	}
 
@@ -84,11 +90,6 @@ nsky.FxLayer.HSLModulate.prototype.doEffect = function(options) {
 			hsl.s *= sp;
 
 			color = this.fromHSL(hsl);
-
-			// tmp  = nsky.Util.Channel('r', color) << 24;
-			// tmp += nsky.Util.Channel('g', color) << 16; 
-			// tmp += nsky.Util.Channel('b', color) <<  8; 
-			// tmp += nsky.Util.Channel('a', color); 
 			out[x][y] = color;
 		}
 	}
@@ -180,13 +181,10 @@ nsky.FxLayer.HSLModulate.prototype.fromHSL = function(hsl) {
         b = hueToRGB(p, q, hsl.h - 1/3);
 	}
 
-	var out;
-	out  = (r * 255) << 24;
-	out += (g * 255) << 16;
-	out += (b * 255) <<  8;
-	out += (hsl.a);
-
-	return out;
+	return 	((r * 255) << 24) +
+			((g * 255) << 16) +
+	 		((b * 255) <<  8) +
+	 		(hsl.a);
 }
 
 

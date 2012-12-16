@@ -33,11 +33,14 @@
 					// 	},
 					// 	blend: nsky.Layer.Blend.plus
 					// });
+
+					// console.time("Gamma");
 					var result = layer2;
-					var gammaFx = new nsky.FxLayer.GammaCorrect();
-					result = gammaFx.blend($.extend({
-						gamma : 0.5
-					}, result));
+					// var gammaFx = new nsky.FxLayer.GammaCorrect();
+					// result = gammaFx.blend($.extend({
+					// 	gamma : 0.5
+					// }, result));
+					// console.timeEnd("Gamma");
 
 					var neg  = new nsky.FxLayer.Colortone();
 					result = neg.blend($.extend({
@@ -50,8 +53,18 @@
 					result.mask_negate = true;
 					result = neg.blend(result)
 
+					var gammaFx = new nsky.FxLayer.GammaCorrect();
+					result = gammaFx.blend($.extend({
+						gamma : 0.7
+					}, result));
+
+					// console.time("HSL");
 					// var hslFx = new nsky.FxLayer.HSLModulate();
-					// result = hslFx.blend(result);
+					// result = hslFx.blend($.extend({
+					// 	saturation : 50,
+					// 	luminance : 50
+					// }, result));
+					// console.timeEnd("HSL");
 
 					// console.log(result);
 					console.timeEnd("All");
