@@ -29,6 +29,13 @@ nsky.Util.RGBAtoString = function(rgba) {
 		( rgba         & 0xFF) + ")";
 }
 
+nsky.Util.RGBAtoColor = function(r, g, b, a) {
+	return 	((r & 0xFF) << 24) + 
+			((g & 0xFF) << 16) + 
+			((b & 0xFF) << 8)  +
+			((a & 0xFF)) ;
+}
+
 nsky.Util.Channel = function(name, color) {
 	switch(name) {
 		case 'red':

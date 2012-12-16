@@ -20,34 +20,46 @@
 				var img2 = new Image();
 				layer.setDataFromImage(img);
 				img2.onload = function() {
+					console.time("All");
 					layer2.setDataFromImage(img2);
 					layer2.offset.x = 10;
 
-					var result = layer2.blend({
-						data : layer.data,
-						size : layer.size,
-						offset : {
-							x : 0,
-							y : 10
-						},
-						blend: nsky.Layer.Blend.multiply
-					});
+					// var result = layer2.blend({
+					// 	data : layer.data,
+					// 	size : layer.size,
+					// 	offset : {
+					// 		x : 0,
+					// 		y : 10
+					// 	},
+					// 	blend: nsky.Layer.Blend.plus
+					// });
+					var result = layer2;
+					// var gammaFx = new nsky.FxLayer.GammaCorrect();
+					// result = gammaFx.blend($.extend({
+					// 	gamma : 0.5
+					// }, result));
 
-					var gammaFx = new nsky.FxLayer.GammaCorrect();
-					result = gammaFx.blend($.extend({
-						gamma : 0.5
+					var neg  = new nsky.FxLayer.Colortone();
+					result = neg.blend($.extend({
+						mask_image : result,
+						color : nsky.Util.RGBAtoColor(0x22, 0x2b, 0x6d, 0xFF)
 					}, result));
 
-					var hslFx = new nsky.FxLayer.HSLModulate();
-					result = hslFx.blend(result);
+					result.mask_image = result;
+					result.color = nsky.Util.RGBAtoColor(0xF7, 0xDA, 0xAE, 0xFF);
+					result.mask_negate = true;
+					result = neg.blend(result)
 
-					console.log(result);
+					// var hslFx = new nsky.FxLayer.HSLModulate();
+					// result = hslFx.blend(result);
 
+					// console.log(result);
+					console.timeEnd("All");
 					nsky.Canvas.flip(result);
 				}
 
 
-				img2.src = "img/test-gra.png";
+				img2.src = "img/test-dog.jpg";
 
 
 

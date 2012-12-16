@@ -59,8 +59,8 @@ nsky.FxLayer.HSLModulate.prototype = new nsky.FxLayer();
 nsky.FxLayer.HSLModulate.prototype.doEffect = function(options) {
 
 	options = $.extend({
-		hue : 180,
-		saturation : 20,
+		hue : 100,
+		saturation : 100,
 		luminance : 100
 	}, options);
 
@@ -85,11 +85,11 @@ nsky.FxLayer.HSLModulate.prototype.doEffect = function(options) {
 
 			color = this.fromHSL(hsl);
 
-			tmp  = nsky.Util.Channel('r', color) << 24;
-			tmp += nsky.Util.Channel('g', color) << 16; 
-			tmp += nsky.Util.Channel('b', color) <<  8; 
-			tmp += nsky.Util.Channel('a', color); 
-			out[x][y] = tmp;
+			// tmp  = nsky.Util.Channel('r', color) << 24;
+			// tmp += nsky.Util.Channel('g', color) << 16; 
+			// tmp += nsky.Util.Channel('b', color) <<  8; 
+			// tmp += nsky.Util.Channel('a', color); 
+			out[x][y] = color;
 		}
 	}
 
@@ -187,4 +187,148 @@ nsky.FxLayer.HSLModulate.prototype.fromHSL = function(hsl) {
 	out += (hsl.a);
 
 	return out;
+}
+
+
+
+/*****************************************************************************************
+ * Simply negates the image colors (255 - channel)
+ *
+ * Parameters: 
+ *		'negate_alpha' : false|true (default: false) if true the alpha value will be negated
+ 													 too.
+ ****************************************************************************************/
+
+nsky.FxLayer.Negate = function() {}
+nsky.FxLayer.Negate.prototype = new nsky.FxLayer();
+nsky.FxLayer.Negate.prototype.doEffect = function(options) {
+
+	options = $.extend({
+		negate_alpha : false
+	}, options);
+
+	var color, tmp;
+	var out = [];
+
+	for(var x = 0; x < options.size.width; x++) {
+		out[x] = [];
+		for(var y = 0; y < options.size.height; y++) {
+
+			color = options.data[x][y];
+
+			out[x][y] = nsky.Util.RGBAtoColor(
+					(255 - nsky.Util.Channel('r', color)),
+					(255 - nsky.Util.Channel('g', color)),
+					(255 - nsky.Util.Channel('b', color)),
+					(options.negate_alpha)?
+						(255 - nsky.Util.Channel('a', color)) : 
+							   nsky.Util.Channel('a', color)
+				);
+
+		}
+	}
+
+	return {
+		size : options.size,
+		offset : options.offset,
+		data : out
+	};
+}
+
+/*****************************************************************************************
+ * Returns a new, one-color image with the same dimension and offset as the original
+ *
+ * Parameters: 
+ *		'fillcolor' : color (default: red) 
+ ****************************************************************************************/
+
+nsky.FxLayer.TmpImage = function() {}
+nsky.FxLayer.TmpImage.prototype = new nsky.FxLayer();
+nsky.FxLayer.TmpImage.prototype.doEffect = function(options) {
+
+	options = $.extend({
+		fillcolor : nsky.Util.RGBAtoColor(255, 0, 0, 255)
+	}, options);
+
+	var out = [];
+
+	for(var x = 0; x < options.size.width; x++) {
+		out[x] = [];
+		for(var y = 0; y < options.size.height; y++) {
+			out[x][y] = options.fillcolor;
+		}
+	}
+
+	return {
+		size : options.size,
+		offset : options.offset,
+		data : out
+	};
+}
+
+nsky.FxLayer.Colortone = function() {}
+nsky.FxLayer.Colortone.prototype = new nsky.FxLayer();
+nsky.FxLayer.Colortone.prototype.doEffect = function(options) {
+	options = $.extend({
+		color : nsky.Util.RGBAtoColor(255, 255, 255, 255),
+		mask_image : null,
+		mask_negate : false
+	}, options);
+
+	//1. create mask.
+	var mask;
+
+	if(options.mask_image == null) {
+		var tmpFx = new nsky.FxLayer.TmpImage();
+		mask = tmpFx.blend($.extend({
+			fillcolor : nsky.Util.RGBAtoColor(128, 128, 128, 255)
+		}, options));
+	} else {
+		mask = options.mask_image;
+		//convert to grayscale...
+		var hslFx = new nsky.FxLayer.HSLModulate();
+		mask = hslFx.blend($.extend({
+			saturation : 0
+		}, mask));
+	}
+
+	if(options.mask_negate) {
+		var negFx = new nsky.FxLayer.Negate();
+		mask = negFx.blend(mask);
+	}
+
+	//2. create solid color image
+
+	var colFx = new nsky.FxLayer.TmpImage();
+	var color = colFx.blend($.extend({
+		fillcolor : options.color
+	}, options));
+
+	//3. blend solid color and original image using the mask
+
+	var mixed = [];
+	var fillweight = 0;
+	var cadd = nsky.Layer.Blend.plus;
+
+	for(var x = 0; x < options.size.width; x++) {
+		mixed[x] = [];
+		for(var y = 0; y < options.size.height; y++) {
+			//original color
+			ocolor = options.data[x][y];
+			//mask color
+			mcolor = nsky.Util.Channel('r', mask.data[x][y]);
+			//fill color
+			fcolor = color.data[x][y];
+
+			fillweight = (mcolor == 0)? 0 : ((mcolor / 255) * 100);
+
+			mixed[x][y] = cadd(ocolor, fcolor, {'blend_weight_p1' : fillweight});
+		}
+	}
+
+	return {
+		size : options.size,
+		offset : options.offset,
+		data : mixed
+	};
 }

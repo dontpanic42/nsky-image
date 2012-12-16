@@ -10,11 +10,13 @@ nsky.Layer = function(options) {
 	}, options);
 
 	this.offset = opt.offset;
-	this.size = {
+	
+	this.size = (opt.size)? opt.size : {
 		width : 0,
 		height : 0
 	};
-	this.data = [];
+
+	this.data = (opt.data)? opt.data : [];
 }
 
 nsky.Layer.prototype.setDataFromImage = function(image) {
@@ -146,10 +148,9 @@ nsky.Layer.prototype.blend = function(options) {
 }
 
 
+
 nsky.FxLayer = function() { }
-
 nsky.FxLayer.prototype = new nsky.Layer();
-
 
 /**
  * To stay consistent with the default, imagebased layer,
