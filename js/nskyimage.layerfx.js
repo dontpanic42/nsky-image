@@ -295,23 +295,18 @@ nsky.FxLayer.Colortone.prototype.doEffect = function(options) {
 			fillcolor : nsky.Util.RGBAtoColor(128, 128, 128, 255)
 		}, options));
 	} else {
-		console.time("Grayscale");
 		mask = options.mask_image;
 		var grayFx = new nsky.FxLayer.Grayscale();
 		mask = grayFx.blend(mask);
-		console.timeEnd("Grayscale");
 	}
 
-	console.time("Negation");
 	if(options.mask_negate) {
 		var negFx = new nsky.FxLayer.Negate();
 		mask = negFx.blend(mask);
 	}
-	console.timeEnd("Negation");
 
 	//3. blend solid color and original image using the mask
 
-	console.time("Blending");
 	var mixed = [];
 	var cadd = nsky.Layer.Blend.plus;
 
@@ -322,7 +317,6 @@ nsky.FxLayer.Colortone.prototype.doEffect = function(options) {
 			mixed[x][y] = cadd(options.data[x][y], options.color, ((mcolor == 0)? 0 : (mcolor / 255)));
 		}
 	}
-	console.timeEnd("Blending");
 
 	return {
 		size : options.size,

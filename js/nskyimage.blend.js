@@ -60,40 +60,11 @@ nsky.Layer.Blend.burn = function(rgba1, rgba2) {
 
 /**
  * This works like the imagemagick's 'plus', that is, the r, g, b, AND a
- * simply get added. The alpha addition weight can be controlled via the 
- * blend_weight_p1 and belnd_weight_p2 parameters. If the last parameter
- * is omitted 100 - p1 will be used.
+ * simply get added. The addition weight can be influenced by p1.
  * If no parameter is given, the values will be added equaly (50% each).
  */
 nsky.Layer.Blend.plus = function(rgba1, rgba2, p1) {
-	// var opt = $.extend({
-	// 	blend_weight_p1 : 0.5,
-	// 	blend_weight_p2 : 1 - this.blend_weight_p1
-	// }, options);
 	var p2 = 1 - p1;
-	// var p1 = opt.blend_weight_p1;
-	// var p2 = opt.blend_weight_p2;
-
-	// var out = 0;
-
-	// out += Math.min(
-	// 	(p1*nsky.Util.Channel('r', rgba1)) + 
-	// 	(p2*nsky.Util.Channel('r', rgba2)),
-	// 	255) << 24;
-	// out += Math.min(
-	// 	(p1*nsky.Util.Channel('g', rgba1)) + 
-	// 	(p2*nsky.Util.Channel('g', rgba2)),
-	// 	255) << 16;
-	// out += Math.min(
-	// 	(p1*nsky.Util.Channel('b', rgba1)) + 
-	// 	(p2*nsky.Util.Channel('b', rgba2)),
-	// 	255) << 8;
-	// out += Math.min(
-	// 	(p1 * nsky.Util.Channel('a', rgba1)) + 
-	// 	(p2 * nsky.Util.Channel('a', rgba2)),
-	// 	255);
-
-	// return out;
 
 	return (Math.min(
 			(p1 * (rgba1 >>> 24)) + (p2 * (rgba2 >>> 24)),
