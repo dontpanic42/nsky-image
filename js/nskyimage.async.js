@@ -3,14 +3,17 @@ nsky.Async = {};
 //this is fixed because f*cking javascript offers no way
 //of letting me know how many cores your cpu has... assuming
 //that dualcore+ht (4 logical cores) is ok for everyone.
-nsky.Async.maxThreads = 4;
+nsky.Async.maxThreads = 4; //parseInt(prompt("How many (logical cores) does your cpu have?"));
 nsky.Async.pool = [];
 nsky.Async.path = 'js/nskyimage.layerfx.js';
 
-nsky.Async.DoAsync = function(command, options, data, callback) {
+nsky.Async.DoAsync = function(command, options, data, callback, forceSingleThread) {
 
-	(new nsky.Async.AsyncTask(command, options, data, callback))
-	.start(nsky.Async.maxThreads);
+	(new nsky.Async.AsyncTask(command, 
+							  options, 
+							  data, 
+							  callback))
+	.start((forceSingleThread)? 1 : nsky.Async.maxThreads);
 
 }
 

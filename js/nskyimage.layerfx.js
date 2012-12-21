@@ -73,11 +73,10 @@ nsky.FxLayer.GammaCorrect.prototype.doEffect = function(options) {
 		out[x] = [];
 		for(var y = 0; y < oHeight; y++) {
 			color = options.data[x][y];
-			out[x][y] = Math.floor(
-							(gamma_lookup[(color >>> 24)] << 24) |
-							(gamma_lookup[(color >>> 16) & 0xFF] << 16) | 
-							(gamma_lookup[(color >>> 8)  & 0xFF] << 8) |
-							(color & 0xFF));
+			out[x][y] = (gamma_lookup[(color >>> 24)] << 24) |
+						(gamma_lookup[(color >>> 16) & 0xFF] << 16) | 
+						(gamma_lookup[(color >>> 8)  & 0xFF] << 8) |
+						(color & 0xFF);
 		}
 	}
 
@@ -228,9 +227,9 @@ nsky.FxLayer.HSLModulate.prototype.fromHSL = function(hsl) {
         b = this.hueToRGB(p, q, hsl.h - 1/3);
 	}
 
-	return 	(Math.floor(r * 255) << 24) +
-			(Math.floor(g * 255) << 16) +
-	 		(Math.floor(b * 255) <<  8) +
+	return 	((r * 255) << 24) |
+			((g * 255) << 16) |
+	 		((b * 255) <<  8) |
 	 		(hsl.a);
 }
 
@@ -292,7 +291,7 @@ nsky.FxLayer.Grayscale.prototype.doEffect = function(options) {
 						+ 0.59 * ((color >> 16) & 0xFF)
 						+ 0.11 * ((color >> 8) & 0xFF);
 			out[x][y] = 
-				(intensity << 24) + (intensity << 16) + (intensity << 8) + (color & 0xFF);
+				(intensity << 24) | (intensity << 16) | (intensity << 8) | (color & 0xFF);
 
 		}
 	}
