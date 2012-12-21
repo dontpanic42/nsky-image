@@ -9,7 +9,10 @@
 	<script type="application/javascript">
 		$(document).ready(function() {
 
-			nsky.Init();
+			nsky.Init({
+				width: 1920,
+				height : 1080
+			});
 
 			var layer = new nsky.Layer();
 			var layer2= new nsky.Layer();
@@ -34,34 +37,34 @@
 					// 	blend: nsky.Layer.Blend.plus
 					// });
 
-					console.time("Gamma");
 					var result = layer2;
-					var gammaFx = new nsky.FxLayer.GammaCorrect();
-					result = gammaFx.blend($.extend({
-						gamma : 0.5
-					}, result));
-					console.timeEnd("Gamma");
+					// console.time("Gamma");
+					// var gammaFx = new nsky.FxLayer.GammaCorrect();
+					// result = gammaFx.blend($.extend({
+					// 	gamma : 0.5
+					// }, result));
+					// console.timeEnd("Gamma");
 
 					// console.time("Negate");
 					// var negaFx = new nsky.FxLayer.Negate();
 					// result = negaFx.blend(result);
 					// console.timeEnd("Negate");
 
-					// var neg  = new nsky.FxLayer.Colortone();
-					// result = neg.blend($.extend({
-					// 	mask_image : result,
-					// 	color : nsky.Util.RGBAtoColor(0x22, 0x2b, 0x6d, 0xFF)
-					// }, result));
+					var neg  = new nsky.FxLayer.Colortone();
+					result = neg.blend($.extend({
+						mask_image : result,
+						color : nsky.Util.RGBAtoColor(0x22, 0x2b, 0x6d, 0xFF)
+					}, result));
 
-					// result.mask_image = result;
-					// result.color = nsky.Util.RGBAtoColor(0xF7, 0xDA, 0xAE, 0xFF);
-					// result.mask_negate = true;
-					// result = neg.blend(result);
+					result.mask_image = result;
+					result.color = nsky.Util.RGBAtoColor(0xF7, 0xDA, 0xAE, 0xFF);
+					result.mask_negate = true;
+					result = neg.blend(result);
 
-					// var gammaFx = new nsky.FxLayer.GammaCorrect();
-					// result = gammaFx.blend($.extend({
-					// 	gamma : 0.7
-					// }, result));
+					var gammaFx = new nsky.FxLayer.GammaCorrect();
+					result = gammaFx.blend($.extend({
+						gamma : 0.7
+					}, result));
 
 					// console.time("HSL");
 					// var hslFx = new nsky.FxLayer.HSLModulate();
@@ -79,7 +82,7 @@
 				}
 
 
-				img2.src = "img/test-dog.jpg";
+				img2.src = "img/flower.jpg";
 
 
 
