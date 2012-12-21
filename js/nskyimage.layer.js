@@ -154,7 +154,6 @@ nsky.Layer.prototype.blend = function(options) {
 
 
 nsky.FxLayer = function() { }
-nsky.FxLayer.prototype = new nsky.Layer();
 
 /**
  * To stay consistent with the default, imagebased layer,

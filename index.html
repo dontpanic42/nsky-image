@@ -6,26 +6,27 @@
 	<script type="application/javascript" src="js/nskyimage.layer.js"></script>
 	<script type="application/javascript" src="js/nskyimage.blend.js"></script>
 	<script type="application/javascript" src="js/nskyimage.layerfx.js"></script>
+	<script type="application/javascript" src="js/nskyimage.async.js"></script>
 	<script type="application/javascript">
 		$(document).ready(function() {
 
-			nsky.Init({
-				width: 1920,
-				height : 1080
-			});
+			// nsky.Init({
+			// 	width: 1920,
+			// 	height : 1080
+			// });
 
-			var layer = new nsky.Layer();
-			var layer2= new nsky.Layer();
+			// var layer = new nsky.Layer();
+			// var layer2= new nsky.Layer();
 
-			var img = new Image();
-			img.onload = function() {
+			// var img = new Image();
+			// img.onload = function() {
 
-				var img2 = new Image();
-				layer.setDataFromImage(img);
-				img2.onload = function() {
-					console.time("All");
-					layer2.setDataFromImage(img2);
-					layer2.offset.x = 0;
+			// 	var img2 = new Image();
+			// 	layer.setDataFromImage(img);
+			// 	img2.onload = function() {
+			// 		console.time("All");
+			// 		layer2.setDataFromImage(img2);
+			// 		layer2.offset.x = 0;
 
 					// var result = layer2.blend({
 					// 	data : layer.data,
@@ -37,7 +38,7 @@
 					// 	blend: nsky.Layer.Blend.plus
 					// });
 
-					var result = layer2;
+				// var result = layer2;
 					// console.time("Gamma");
 					// var gammaFx = new nsky.FxLayer.GammaCorrect();
 					// result = gammaFx.blend($.extend({
@@ -50,21 +51,21 @@
 					// result = negaFx.blend(result);
 					// console.timeEnd("Negate");
 
-					var neg  = new nsky.FxLayer.Colortone();
-					result = neg.blend($.extend({
-						mask_image : result,
-						color : nsky.Util.RGBAtoColor(0x22, 0x2b, 0x6d, 0xFF)
-					}, result));
+				// var neg  = new nsky.FxLayer.Colortone();
+				// result = neg.blend($.extend({
+				// 	mask_image : result,
+				// 	color : nsky.Util.RGBAtoColor(0x22, 0x2b, 0x6d, 0xFF)
+				// }, result));
 
-					result.mask_image = result;
-					result.color = nsky.Util.RGBAtoColor(0xF7, 0xDA, 0xAE, 0xFF);
-					result.mask_negate = true;
-					result = neg.blend(result);
+				// result.mask_image = result;
+				// result.color = nsky.Util.RGBAtoColor(0xF7, 0xDA, 0xAE, 0xFF);
+				// result.mask_negate = true;
+				// result = neg.blend(result);
 
-					var gammaFx = new nsky.FxLayer.GammaCorrect();
-					result = gammaFx.blend($.extend({
-						gamma : 0.7
-					}, result));
+				// var gammaFx = new nsky.FxLayer.GammaCorrect();
+				// result = gammaFx.blend($.extend({
+				// 	gamma : 0.7
+				// }, result));
 
 					// console.time("HSL");
 					// var hslFx = new nsky.FxLayer.HSLModulate();
@@ -75,21 +76,58 @@
 					// console.timeEnd("HSL");
 
 					// console.log(result);
-					console.timeEnd("All");
-					console.time("Flip");
-					nsky.Canvas.flip(result);
-					console.timeEnd("Flip");
-				}
+			// 		console.timeEnd("All");
+			// 		console.time("Flip");
+			// 		nsky.Canvas.flip(result);
+			// 		console.timeEnd("Flip");
+			// 	}
 
 
-				img2.src = "img/flower.jpg";
+			// 	img2.src = "img/flower.jpg";
 
 
 
-			}
+			// }
 
-			img.src = "img/test-red.png";
+			// img.src = "img/test-red.png";
+
+			// nsky.Async.DoAsync('WTest', {data : 10}, function(e) {
+			// 	console.log(e);
+			// })
+
 			
+			nsky.Init({
+				width: 1920,
+				height : 1080
+			});
+
+			var layer = new nsky.Layer();
+
+			var img = new Image();
+			img.onload = function() {
+				layer.setDataFromImage(img);
+
+				//Async testcase:
+
+				console.time("HSL Async");
+				nsky.Async.DoAsync("HSLModulate", {}, layer.data, function(result) {
+					console.timeEnd("HSL Async");
+					layer.data = result;
+					nsky.Canvas.flip(layer);
+				})
+
+				//Sync testcase:
+
+				// console.time("HSL Sync");
+				// var negaFx = new nsky.FxLayer.HSLModulate();
+				// result = negaFx.blend(layer);
+				// console.timeEnd("HSL Sync");
+
+				// nsky.Canvas.flip(result);
+
+			};
+
+			img.src = "img/flower.jpg";
 
 		});
 	</script>

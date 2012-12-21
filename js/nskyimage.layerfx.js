@@ -1,3 +1,39 @@
+// Making this file stand-alone in case it is called
+// in webworker context
+if(!nsky)
+	var nsky = {};
+
+nsky.FxLayer = function() { }
+
+/**
+ * To stay consistent with the default, imagebased layer,
+ * this method will be called to invoke the effect. It
+ * simply extends the options object to incorporate defaults
+ * and delegates to the main effect method, doEffect.
+ */
+nsky.FxLayer.prototype.blend = function(options) { 
+		var opt = $.extend({
+		offset : {
+			x : 0, 
+			y : 0
+		},
+		data : [],
+		size : {
+			width : 0,
+			height : 0
+		}
+	}, options);
+
+	return this.doEffect(opt);
+}
+
+/**
+ * This is the main effect method, which the effect implementation
+ * overrides. The returnvalue is an object with the images size, offset
+ * and pixeldata.
+ */
+nsky.FxLayer.prototype.doEffect = function(options) { }
+
 
 /*****************************************************************************************
  * Gamma Correction Filter
@@ -66,15 +102,9 @@ nsky.FxLayer.HSLModulate = function() { }
 nsky.FxLayer.HSLModulate.prototype = new nsky.FxLayer();
 nsky.FxLayer.HSLModulate.prototype.doEffect = function(options) {
 
-	options = $.extend({
-		hue : 100,
-		saturation : 100,
-		luminance : 100
-	}, options);
-
-	var hp = (options.hue == 0)? 0 : options.hue / 100;
-	var sp = (options.saturation == 0)? 0 : options.saturation / 100;
-	var lp = (options.luminance == 0)? 0 : options.luminance / 100;
+	var hp = options.hue || 1;
+	var sp = options.saturation || 0.1;
+	var lp = options.luminance || 1;
 
 	var hsl;
 	var out = [];
@@ -97,6 +127,33 @@ nsky.FxLayer.HSLModulate.prototype.doEffect = function(options) {
 		offset : options.offset,
 		data : out
 	};
+}
+
+nsky.FxLayer.HSLModulate.prototype.doEffectAsync = function(data, options) {
+
+	var hp = options.hue || 1;
+	var sp = options.saturation || 0.1;
+	var lp = options.luminance || 1;
+
+	var hsl;
+	var out = [];
+
+	var sizex = data.length, sizey = data[0].length;
+
+	for(var x = 0; x < sizex; x++) {
+		out[x] = [];
+		for(var y = 0; y < sizey; y++) {
+			hsl = this.toHSL(data[x][y]);
+
+			hsl.h *= hp;
+			hsl.l *= lp;
+			hsl.s *= sp;
+
+			out[x][y] = this.fromHSL(hsl);;
+		}
+	}
+
+	return out;
 }
 
 /**
@@ -324,4 +381,46 @@ nsky.FxLayer.Colortone.prototype.doEffect = function(options) {
 		offset : options.offset,
 		data : mixed
 	};
+}
+
+/**
+ * Webworker test
+ **/
+
+nsky.FxLayer.WTest = function() {}
+nsky.FxLayer.WTest.prototype = new nsky.FxLayer();
+nsky.FxLayer.WTest.prototype.doEffectAsync = function(data, options) {
+	var result = [];
+	for(var i = 0; i < data.length; i++) {
+		result[i] = data[i] + 10;
+	}
+
+	return result;
+}
+
+/**
+ * Webworker stuff
+ **/
+
+if(self) {
+	self.addEventListener('message', function(event) {
+		var task = event.data;
+		if(!task.cmd || nsky.FxLayer[task.cmd] == undefined) 
+			return;
+		var index = task.index || 0;
+
+		//create effect instance
+		var constr = nsky.FxLayer[task.cmd];
+
+		var effect = new constr();
+
+		var result;
+		if(effect.doEffectAsync) 
+			result = effect.doEffectAsync(task.data, task.options);
+
+		self.postMessage({
+			data : result,
+			index : index
+		});
+	});
 }
